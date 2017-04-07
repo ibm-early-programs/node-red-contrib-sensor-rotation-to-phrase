@@ -39,8 +39,6 @@ module.exports = function (RED) {
 
     if (isNaN(parseFloat(config['sensitivity']))) {
       message = 'Sensitivity setting must be a number';
-    } else if (! config['device-id']) {
-      message = 'Device ID must be configured';
     }
     return message;
   }
@@ -74,6 +72,55 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
+  function detectMotion(context, motion, config){
+    // Value in the context will be the last postion
+    var lastPosition = context.get('position') || null;
+
+    // Initial Data Checks will have ensured that all data
+    // and configuration is as expected.
+    if (lastPosition) {
+      console.log('Will be calculating rotation here');
+      var sensitivity = parseFloat(config['sensitivity']) || 0.5;
+
+      if (lastPosition.accelX != motion.accelX) {
+          if (sensitivity <= Math.abs(lastPosition.accelX - motion.accelX)) {
+              motion.x = true;
+              motion.dx = lastPosition.accelX - motion.accelX;
+          }
+      }
+      if (lastPosition.accelY != motion.accelY) {
+          if (sensitivity <= Math.abs(lastPosition.accelY - motion.accelY)) {
+              motion.y = true;
+              motion.dy = lastPosition.accelY - motion.accelY;
+          }
+      }
+      if (lastPosition.accelZ != motion.accelZ) {
+          if (sensitivity <= Math.abs(lastPosition.accelZ - motion.accelZ)) {
+              motion.z = true;
+              motion.dz = lastPosition.accelZ - motion.accelZ;
+          }
+      }
+    }
+    // Store the current postion
+    context.set('position', motion);
+    return Promise.resolve();
+  }
+
+  function reportIfMotion(node, msg, motion) {
+    if (motion.x || motion.y || motion.z) {
+      msg.payload = {
+        'X-Rotation' : motion.dx,
+        'Y-Rotation' : motion.dy,
+        'Z-Rotation' : motion.dz
+      };
+
+      node.status({});
+      node.send(msg);
+    } else {
+      node.status({fill:'blue', shape:'dot', text:'Waiting for motion'});
+    }
+    return Promise.resolve();
+  }
 
   function Node (config) {
     var node = this;
@@ -89,12 +136,15 @@ module.exports = function (RED) {
           initMotion(msg.payload.d, motion);
         })
         .then(function(){
-          node.status({});
-          node.send(msg);
+          detectMotion(node.context(), motion, config);
+        })
+        .then(function(){
+          reportIfMotion(node, msg, motion);
         })
         .catch(function(err){
-          node.status({fill:'red', shape:'dot', text: err});
-          node.error(err, msg);
+          var messageTxt = err.error ? err.error : err;
+          node.status({fill:'red', shape:'dot', text: messageTxt});
+          node.error(messageTxt, msg);
         });
 
     });

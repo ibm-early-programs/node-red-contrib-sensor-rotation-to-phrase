@@ -25,8 +25,7 @@ as
 ````
 
 The sensitivity configuration allows you to determine how much motion is
-required before then node detects rotational motion. The node uses the device
-id to store the last rotational position of the sensortag in the flow context.
+required before then node detects rotational motion.
 
 ... Motion detection from a TI Device
 ... Determines axis Motion
