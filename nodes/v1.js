@@ -16,13 +16,61 @@
 
 module.exports = function (RED) {
 
+  // This node is expecting a device event from a TI SensorTag,
+  // which will come in as msg.payload.d
+  // It works on the rotatational acceleration so that data should
+  // also be provided.
+  function initialDataCheck(msg) {
+    var message = '';
+    if (msg && msg.payload && msg.payload.d) {
+      if (! msg.payload.d.accelX ||
+            ! msg.payload.d.accelY ||
+            ! msg.payload.d.accelZ) {
+        message = 'Missing rotational acceleration';
+      }
+    } else {
+      message = 'Missing device event';
+    }
+
+    if (message){
+      return Promise.reject(message);
+    }
+    return Promise.resolve();
+  }
+
+
   function Node (config) {
     var node = this;
     RED.nodes.createNode(this, config);
 
     this.on('input', function (msg) {
 
-      node.status({fill:'green', shape:'dot', text:'about to do something'});
+      var motion = {};
+
+      node.status({fill:'green', shape:'dot', text:'Processing'});
+      initialDataCheck(msg)
+        .then(function(){
+          node.status({});
+          node.send(msg);
+        })
+        .catch(function(err){
+          node.status({fill:'red', shape:'dot', text: err});
+          node.error(err, msg);
+        });
+
+      //msg.motion.accelX = parseFloat(msg.payload.d.accelX) || 0;
+      //msg.motion.accelY = parseFloat(msg.payload.d.accelY) || 0;
+      //msg.motion.accelZ = parseFloat(msg.payload.d.accelZ) || 0;
+
+      //msg.motion.x = false;
+      //msg.motion.y = false;
+      //msg.motion.z = false;
+
+      //msg.motion.dx = 0;
+      //msg.motion.dy = 0;
+      // msg.motion.dz = 0;
+
+
 
       node.status({});
 

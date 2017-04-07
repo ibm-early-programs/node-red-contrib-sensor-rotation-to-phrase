@@ -11,7 +11,19 @@ Run the following command in the root directory of your Node-RED install:
 
 ## Usage
 
-This node expects input from the IBM IOT Node  
+This node expects input from an IBM IOT In Node. The IOT Node will have been
+configured to report on device events from a TI Sensor Tag. Consequently this node
+expects the rotational acceleration to be provided as input on
+````
+    msg.payload.d
+````
+as
+````
+    msg.payload.d.accelX
+    msg.payload.d.accelY
+    msg.payload.d.accelZ
+````
+
 ... Motion detection from a TI Device
 ... Determines axis Motion
 ... Allows motion to be interpreted as a phrase.

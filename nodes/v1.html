@@ -22,17 +22,34 @@
 </script>
 
 <script type="text/x-red" data-help-name="sensor-rotation-to-phrase">
-    <p>This node is a ...
+    <p>This node is a sensor rotation interpreter. It expects input from
+    an IBM IOT In Node, which has been
+    configured to report on device events from a TI Sensor Tag. Consequently
+    this node interprets the rotational motion as a phrase providing
+    textual instruction for nodes downstream.
+    expects the rotational acceleration to be provided as input on
     </p>
 
     <p><b>Usage</b></p>
-    <p>This node should be provided as input the output from an IBM IOT Node ...: </p>
+    <p>This node expects as input the output from an IBM IOT In Node: </p>
     <ul>
-      <li><code>msg.payload</code> : the ...  </li>
+      <li><code>msg.payload.d</code> : The device event from the TI Sensor
+      tag. The node makes use of the rotational acceleration to Determine
+      motion, and hence interpret that as set phrases. Consequently
+      the following input is expected:
+      <code>
+        msg.payload.d.accelX,
+        msg.payload.d.accelY, 
+        msg.payload.d.accelZ
+      </code>
+      </li>
     </ul>
 
+    <p>output - <code>msg.payload</code></p>
+
+
     <p><b>Configuration</b></p>
-    <p>... 
+    <p>...
     </p>
 </script>
 
