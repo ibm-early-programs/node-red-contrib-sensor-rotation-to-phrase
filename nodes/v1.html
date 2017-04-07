@@ -19,6 +19,18 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+    <div class="form-row">
+        <label for="node-input-device-id">
+            <i class="fa fa-tag"></i> Device ID</label>
+        <input type="text" id="node-input-device-id" placeholder="device ID">
+    </div>
+    <div class="form-row">
+        <label for="node-input-sensitivity">
+            <i class="fa fa-balance-scale"></i> Sensitivity</label>
+        <input type="number" step="0.01" id="node-input-sensitivity" placeholder="">
+    </div>
+
+
 </script>
 
 <script type="text/x-red" data-help-name="sensor-rotation-to-phrase">
@@ -39,7 +51,7 @@
       the following input is expected:
       <code>
         msg.payload.d.accelX,
-        msg.payload.d.accelY, 
+        msg.payload.d.accelY,
         msg.payload.d.accelZ
       </code>
       </li>
@@ -49,25 +61,23 @@
 
 
     <p><b>Configuration</b></p>
-    <p>...
+    <p>Set the sensitivity to determine how much motion is required
+    for rotational motion to be detected.
     </p>
+    <p>As the node needs to remember the previous rotational position the
+    device id is used to store the last postion in the flow context.</p>
 </script>
 
-<style type="text/css">
-  .node_label_white {
-    fill: white;
-  }
-  #palette_node_sensor-rotation-to-phrase > div.palette_label {
-    color: white;
-  }
-</style>
+
 
 <script type="text/javascript">
     (function() {
         RED.nodes.registerType('sensor-rotation-to-phrase', {
             category: 'function',
             defaults: {
-                name: {value: ""}
+                name: {value: ""},
+                'device-id' : {value: ""},
+                sensitivity : {value: 0.5}
             },
             color: "rgb(200,50,50)",
             inputs: 1,

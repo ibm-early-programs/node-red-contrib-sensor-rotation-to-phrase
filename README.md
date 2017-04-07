@@ -24,6 +24,10 @@ as
     msg.payload.d.accelZ
 ````
 
+The sensitivity configuration allows you to determine how much motion is
+required before then node detects rotational motion. The node uses the device
+id to store the last rotational position of the sensortag in the flow context.
+
 ... Motion detection from a TI Device
 ... Determines axis Motion
 ... Allows motion to be interpreted as a phrase.

@@ -20,7 +20,7 @@ module.exports = function (RED) {
   // which will come in as msg.payload.d
   // It works on the rotatational acceleration so that data should
   // also be provided.
-  function initialDataCheck(msg) {
+  function payloadCheck(msg) {
     var message = '';
     if (msg && msg.payload && msg.payload.d) {
       if (! msg.payload.d.accelX ||
@@ -31,10 +31,46 @@ module.exports = function (RED) {
     } else {
       message = 'Missing device event';
     }
+    return message;
+  }
 
-    if (message){
+  function configCheck(msg, config) {
+    var message = '';
+
+    if (isNaN(parseFloat(config['sensitivity']))) {
+      message = 'Sensitivity setting must be a number';
+    } else if (! config['device-id']) {
+      message = 'Device ID must be configured';
+    }
+    return message;
+  }
+
+  function initialDataCheck(msg, config) {
+    var message = '';
+
+    message = payloadCheck(msg);
+    if (!message) {
+      message = configCheck(msg, config);
+    }
+    if (message) {
       return Promise.reject(message);
     }
+    return Promise.resolve();
+  }
+
+  function initMotion(deviceEvent, motion) {
+    motion.accelX = parseFloat(deviceEvent.accelX) || 0;
+    motion.accelY = parseFloat(deviceEvent.accelY) || 0;
+    motion.accelZ = parseFloat(deviceEvent.accelZ) || 0;
+
+    motion.x = false;
+    motion.y = false;
+    motion.z = false;
+
+    motion.dx = 0;
+    motion.dy = 0;
+    motion.dz = 0;
+
     return Promise.resolve();
   }
 
@@ -48,7 +84,10 @@ module.exports = function (RED) {
       var motion = {};
 
       node.status({fill:'green', shape:'dot', text:'Processing'});
-      initialDataCheck(msg)
+      initialDataCheck(msg, config)
+        .then(function(){
+          initMotion(msg.payload.d, motion);
+        })
         .then(function(){
           node.status({});
           node.send(msg);
@@ -58,23 +97,6 @@ module.exports = function (RED) {
           node.error(err, msg);
         });
 
-      //msg.motion.accelX = parseFloat(msg.payload.d.accelX) || 0;
-      //msg.motion.accelY = parseFloat(msg.payload.d.accelY) || 0;
-      //msg.motion.accelZ = parseFloat(msg.payload.d.accelZ) || 0;
-
-      //msg.motion.x = false;
-      //msg.motion.y = false;
-      //msg.motion.z = false;
-
-      //msg.motion.dx = 0;
-      //msg.motion.dy = 0;
-      // msg.motion.dz = 0;
-
-
-
-      node.status({});
-
-      node.send(msg);
     });
   }
 
