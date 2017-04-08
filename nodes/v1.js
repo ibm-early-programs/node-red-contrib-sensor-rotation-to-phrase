@@ -124,6 +124,7 @@ module.exports = function (RED) {
     return m;
   }
 
+  // Reset values are expected after the signal value, so can be ignored
   function toPhrase(node, msg, pr) {
     var go = true;
     console.log('Pitch Roll value is ', pr);
@@ -137,13 +138,40 @@ module.exports = function (RED) {
     } else {
       switch (pr) {
         // Pitch at 45 degrees
-        case 2:
-          resetValue = 1;
-          msg.payload.motion = 'Pitch 45';
-          break;
         case 1:
           resetValue = 2;
           msg.payload.motion = 'Pitch -45';
+          break;
+        case 2:
+          resetValue = 1;
+          msg.payload.motion = 'Pitch +45';
+          break;
+        // Roll at 45 degrees
+        case 10:
+          resetValue = 20;
+          msg.payload.motion = 'Roll -45';
+          break;
+        case 20:
+          resetValue = 10;
+          msg.payload.motion = 'Roll +45';
+          break;
+        // Pitch at 90 degrees
+        case 201:
+          resetValue = 102;
+          msg.payload.motion = 'Pitch -90';
+          break;
+        case 202:
+          resetValue = 101;
+          msg.payload.motion = 'Pitch +90';
+          break;
+        // Roll at 90 degrees
+        case 210:
+          resetValue = 120;
+          msg.payload.motion = 'Roll -90';
+          break;
+        case 220:
+          resetValue = 110;
+          msg.payload.motion = 'Roll +90';
           break;
         default:
           go = false;
