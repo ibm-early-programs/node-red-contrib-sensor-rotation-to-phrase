@@ -79,7 +79,7 @@ module.exports = function (RED) {
     // Initial Data Checks will have ensured that all data
     // and configuration is as expected.
     if (lastPosition) {
-      console.log('Will be calculating rotation here');
+      // console.log('Will be calculating rotation here');
       var sensitivity = parseFloat(config['sensitivity']) || 0.5;
 
       if (lastPosition.accelX != motion.accelX) {
@@ -106,6 +106,54 @@ module.exports = function (RED) {
     return Promise.resolve();
   }
 
+  function motionCalculation(delta) {
+    var v = 0;
+    if (0 < delta) {
+      v = 2;
+    } else if (0 > delta) {
+      v = 1;
+    }
+    return v;
+  }
+
+  function pitchOrRoll(msg, motion) {
+    var m = 0;
+    m += motionCalculation(motion.dx);
+    m += 10 * motionCalculation(motion.dy);
+    m += 100 * motionCalculation(motion.dz);
+    return m;
+  }
+
+  function toPhrase(node, msg, pr) {
+    var go = true;
+    console.log('Pitch Roll value is ', pr);
+    var context = node.context();
+    var resetValue = context.get('resetValue') || null;
+    console.log('Comparing with reset of  ', resetValue);
+
+    if (resetValue && pr == resetValue) {
+        resetValue = null;
+        go = false;
+    } else {
+      switch (pr) {
+        // Pitch at 45 degrees
+        case 2:
+          resetValue = 1;
+          msg.payload.motion = 'Pitch 45';
+          break;
+        case 1:
+          resetValue = 2;
+          msg.payload.motion = 'Pitch -45';
+          break;
+        default:
+          go = false;
+          break;
+      }
+    }
+    context.set('resetValue', resetValue);
+    return go;
+  }
+
   function reportIfMotion(node, msg, motion) {
     if (motion.x || motion.y || motion.z) {
       msg.payload = {
@@ -114,8 +162,13 @@ module.exports = function (RED) {
         'Z-Rotation' : motion.dz
       };
 
-      node.status({});
-      node.send(msg);
+      var pr = pitchOrRoll(msg, motion);
+      if (toPhrase(node, msg, pr)) {
+         node.status({});
+         node.send(msg);
+      } else {
+         node.status({fill:'green', shape:'dot', text:'Listening...'});
+      }
     } else {
       node.status({fill:'blue', shape:'dot', text:'Waiting for motion'});
     }

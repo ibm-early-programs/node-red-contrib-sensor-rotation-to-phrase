@@ -27,6 +27,22 @@ as
 The sensitivity configuration allows you to determine how much motion is
 required before then node detects rotational motion.
 
+### Calibration
+
+If you lay the sensortag down, light sensor up, text the right way round,
+then the side facing away from you is the bow, the side nearest you is the
+stern. Left is port and right is starboard.
+
+Then the **Pitch** will be the up down rolling motion of the bow and port.
+The **Roll** is the tilting motion of the port and starboard. The **Yaw**
+doesn't generate an acceleration reading in the sensortag, so will be
+ignored.
+
+Once a Pitch or Roll of 45 or 90 degrees has been detected, the Node will
+expect a Pitch or Roll that resets the sensorTag back to the horisontal reset
+position. ie. After a Pitch of +45 a Pitch of -45 is expected. If something
+else is seen then that is seen as a new signal Pitch or Roll.
+
 ... Motion detection from a TI Device
 ... Determines axis Motion
 ... Allows motion to be interpreted as a phrase.
