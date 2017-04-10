@@ -155,6 +155,11 @@ module.exports = function (RED) {
           resetValue = 10;
           msg.payload.motion = 'Roll +45';
           break;
+        // Roll or Pitch at 180 degrees
+        case 200:
+          resetValue = 100;
+          msg.payload.motion = 'Roll +180';
+          break;
         // Pitch at 90 degrees
         case 201:
           resetValue = 102;
@@ -163,6 +168,23 @@ module.exports = function (RED) {
         case 202:
           resetValue = 101;
           msg.payload.motion = 'Pitch +90';
+          break;
+        // Pitch at 45 and Roll at 45 degrees
+        case 211:
+          resetValue = 122;
+          msg.payload.motion = 'Pitch -45 & Roll -45';
+          break;
+        case 212:
+          resetValue = 121;
+          msg.payload.motion = 'Pitch +45 & Roll -45';
+          break;
+        case 221:
+          resetValue = 112;
+          msg.payload.motion = 'Pitch -45 & Roll +45';
+          break;
+        case 222:
+          resetValue = 111;
+          msg.payload.motion = 'Pitch +45 & Roll +45';
           break;
         // Roll at 90 degrees
         case 210:
