@@ -51,24 +51,27 @@ A +ve Pitch is the bow rising and a +ve Roll is the Port Rising
 
 | Pitch   | Roll     | Detected  |
 | ------: |---------:|:---------:|
-|  45     |    0     |    √      |
-|  90     |    0     |    √      |
-| -45     |    0     |    √      |
 | -90     |    0     |    √      |
-| -45     |   45     |    √      |
-|  45     |  -45     |    √      |
-|  45     |   45     |    √      |
 | -45        -45     |    √      |
+| -45     |    0     |    √      |
+| -45     |   45     |    √      |
+|   0     |  -90     |    √      |
+|   0     |  -45     |    √      |
 |   0     |   45     |    √      |
 |   0     |   90     |    √      |
 |   0     |  180     |    √      |
-|   0     |  -45     |    √      |
-|   0     |  -90     |    √      |
+|  45     |  -45     |    √      |
+|  45     |    0     |    √      |
+|  45     |   45     |    √      |
+|  90     |    0     |    √      |
 
 
-... Motion detection from a TI Device
-... Determines axis Motion
-... Allows motion to be interpreted as a phrase.
+### Interpretation
+
+Select one of the actions as a start / stop toggle. Define the others
+as set utterances that can are added together to construct a phrase. The node
+only sends the phase on ````msg.payload```` when the stop toggle is detected.
+
 
 ## Contributing
 
