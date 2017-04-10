@@ -39,7 +39,10 @@ module.exports = function (RED) {
 
     if (isNaN(parseFloat(config['sensitivity']))) {
       message = 'Sensitivity setting must be a number';
+    } else if (!config['start-toggle']) {
+      message = 'Start listening toggle needs to be set';
     }
+
     return message;
   }
 
@@ -68,6 +71,8 @@ module.exports = function (RED) {
     motion.dx = 0;
     motion.dy = 0;
     motion.dz = 0;
+
+    motion.pr = 0;
 
     return Promise.resolve();
   }
@@ -126,85 +131,86 @@ module.exports = function (RED) {
 
   // Reset values are expected after the signal value, so can be ignored
   function toPhrase(node, msg, pr) {
-    var go = true;
-    console.log('Pitch Roll value is ', pr);
+    //var go = true;
+    //console.log('Pitch Roll value is ', pr);
     var context = node.context();
     var resetValue = context.get('resetValue') || null;
-    console.log('Comparing with reset of  ', resetValue);
+    var partial = null;
+    //console.log('Comparing with reset of  ', resetValue);
 
     if (resetValue && pr == resetValue) {
         resetValue = null;
-        go = false;
+        //go = false;
     } else {
       switch (pr) {
         // Pitch at 45 degrees
         case 1:
           resetValue = 2;
-          msg.payload.motion = 'Pitch -45';
+          partial = 'Pitch -45';
           break;
         case 2:
           resetValue = 1;
-          msg.payload.motion = 'Pitch +45';
+          partial = 'Pitch +45';
           break;
         // Roll at 45 degrees
         case 10:
           resetValue = 20;
-          msg.payload.motion = 'Roll -45';
+          partial = 'Roll -45';
           break;
         case 20:
           resetValue = 10;
-          msg.payload.motion = 'Roll +45';
+          partial = 'Roll +45';
           break;
         // Roll or Pitch at 180 degrees
         case 200:
           resetValue = 100;
-          msg.payload.motion = 'Roll +180';
+          partial = 'Roll +180';
           break;
         // Pitch at 90 degrees
         case 201:
           resetValue = 102;
-          msg.payload.motion = 'Pitch -90';
+          partial = 'Pitch -90';
           break;
         case 202:
           resetValue = 101;
-          msg.payload.motion = 'Pitch +90';
+          partial = 'Pitch +90';
           break;
         // Pitch at 45 and Roll at 45 degrees
         case 211:
           resetValue = 122;
-          msg.payload.motion = 'Pitch -45 & Roll -45';
+          partial = 'Pitch -45 & Roll -45';
           break;
         case 212:
           resetValue = 121;
-          msg.payload.motion = 'Pitch +45 & Roll -45';
+          partial = 'Pitch +45 & Roll -45';
           break;
         case 221:
           resetValue = 112;
-          msg.payload.motion = 'Pitch -45 & Roll +45';
+          partial = 'Pitch -45 & Roll +45';
           break;
         case 222:
           resetValue = 111;
-          msg.payload.motion = 'Pitch +45 & Roll +45';
+          partial = 'Pitch +45 & Roll +45';
           break;
         // Roll at 90 degrees
         case 210:
           resetValue = 120;
-          msg.payload.motion = 'Roll -90';
+          partial = 'Roll -90';
           break;
         case 220:
           resetValue = 110;
-          msg.payload.motion = 'Roll +90';
+          partial = 'Roll +90';
           break;
         default:
-          go = false;
+          //go = false;
           break;
       }
     }
     context.set('resetValue', resetValue);
-    return go;
+    return partial;
   }
 
-  function reportIfMotion(node, msg, motion) {
+  function measureMotion(node, msg, motion, config) {
     if (motion.x || motion.y || motion.z) {
       msg.payload = {
         'X-Rotation' : motion.dx,
@@ -212,17 +218,87 @@ module.exports = function (RED) {
         'Z-Rotation' : motion.dz
       };
 
-      var pr = pitchOrRoll(msg, motion);
+      motion.pr = pitchOrRoll(msg, motion);
+      //node.context().set('pr', pr);
+      if (!checkToggle(node, motion, config)) {
+        var partial = toPhrase(node, msg, motion.pr);
+        if (partial) {
+          buildPhrase(node, msg, partial);
+        }
+      } else {
+        var context = node.context();
+        var phrase = context.get('phrase') || '';
+        msg.payload.phrase = phrase;
+        context.set('phrase', '');
+        node.send(msg);
+        node.status({fill:'green', shape:'dot', text:'Sent'});
+      }
+
+      /*
       if (toPhrase(node, msg, pr)) {
          node.status({});
          node.send(msg);
       } else {
          node.status({fill:'green', shape:'dot', text:'Listening...'});
       }
-    } else {
+      */
+    }
+    /*
+    else {
       node.status({fill:'blue', shape:'dot', text:'Waiting for motion'});
     }
+    */
+    //return Promise.resolve(pr);
     return Promise.resolve();
+  }
+
+  function checkToggle(node, motion, config) {
+    var isToggle = false;
+    var context = node.context();
+    //var pr = motion.pr;
+    var toggle = config['start-toggle'];
+
+    //console.log('toggle is : ', toggle, typeof(toggle));
+    //console.log('value is : ', pr, typeof pr);
+
+    if (parseInt(toggle) == motion.pr) {
+      var listening = context.get('listening') || false;
+      listening = !listening;
+      context.set('listening', listening);
+      context.set('started', true);
+
+      isToggle = true;
+      //console.log('listing : ', listening);
+    }
+    return isToggle;
+  }
+
+  function buildPhrase(node, msg, partial) {
+    //console.log('In buildPhrase');
+
+    var context = node.context();
+    var started = context.get('started') || false;
+    var listening = context.get('listening') || false;
+
+    if (started) {
+      //console.log('started has been detected');
+      var phrase = context.get('phrase') || '';
+      if (listening) {
+        //console.log('listening has been detected');
+        //console.log('Partial Phrase is : ', partial);
+        //console.log('current full phrase is :', phrase);
+        phrase += (partial + ' ');
+        context.set('phrase', phrase);
+        node.status({fill:'blue', shape:'dot', text:phrase});
+      } //else {
+        //msg.payload.phrase = phrase;
+        //context.set('phrase', '');
+        //node.send(msg);
+        //node.status({fill:'blue', shape:'dot', text:'Sent'});
+      //}
+    } else {
+      context.set('phrase', '');
+    }
   }
 
   function Node (config) {
@@ -233,7 +309,7 @@ module.exports = function (RED) {
 
       var motion = {};
 
-      node.status({fill:'green', shape:'dot', text:'Processing'});
+      //node.status({fill:'green', shape:'dot', text:'Processing'});
       initialDataCheck(msg, config)
         .then(function(){
           initMotion(msg.payload.d, motion);
@@ -242,8 +318,16 @@ module.exports = function (RED) {
           detectMotion(node.context(), motion, config);
         })
         .then(function(){
-          reportIfMotion(node, msg, motion);
+          measureMotion(node, msg, motion, config);
         })
+        //.then(function(){
+        //  checkToggle(node, motion, config);
+          // var pr = node.context().get('pr') || null;
+          //console.log('Detected :', pr);
+        //})
+        //.then(function(){
+        //  buildPhrase(node, msg);
+        //})
         .catch(function(err){
           var messageTxt = err.error ? err.error : err;
           node.status({fill:'red', shape:'dot', text: messageTxt});
