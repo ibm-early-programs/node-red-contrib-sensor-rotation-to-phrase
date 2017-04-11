@@ -1,0 +1,274 @@
+<!--
+  Copyright 2017 IBM Corp.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="sensor-rotation-to-phrase">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-sensitivity">
+            <i class="fa fa-balance-scale"></i> Sensitivity</label>
+        <input type="number" step="0.01" min="0.01" max="0.99" 
+                      id="node-input-sensitivity" placeholder="">
+    </div>
+    <div class="form-row">
+        <label for="node-input-start-toggle"><i class="fa fa-toggle-off"></i> Listen / Send Toggle: </label>
+        <select type="text" id="node-input-start-toggle" style="display: inline-block; width: 70%;">
+            <option value="201">Pitch -90 Roll 0</option>
+            <option value="211">Pitch -45 Roll -45</option>
+            <option value="1">Pitch -45 Roll 0</option>
+            <option value="221">Pitch -45 Roll +45</option>
+            <option value="210">Pitch 0 Roll -90</option>
+            <option value="10">Pitch 0 Roll -45</option>
+            <option value="20">Pitch 0 Roll 45</option>
+            <option value="202">Pitch 0 Roll 90</option>
+            <option value="200">Pitch 0 Roll 180</option>
+            <option value="212">Pitch 45 Roll -45</option>
+            <option value="2">Pitch 45 Roll 0</option>
+            <option value="222">Pitch 45 Roll 45</option>
+            <option value="220">Pitch 90 Roll 0</option>
+        </select>
+    </div>
+
+      <div class="form-row">
+          <label for="node-input-pm90-r0"><i class="fa fa-quote-right"></i>
+               Pitch -90 Roll 0</label>
+          <input class="pitch-roll" type="text" id="node-input-pm90-r0" placeholder="">
+      </div>
+      <div class="form-row">
+          <label for="node-input-pm45-rm45"><i class="fa fa-quote-right"></i>
+               Pitch -45 Roll -45</label>
+          <input class="pitch-roll" type="text" id="node-input-pm45-rm45" placeholder="">
+      </div>
+      <div class="form-row">
+          <label for="node-input-pm45-r0"><i class="fa fa-quote-right"></i>
+               Pitch -45 Roll 0</label>
+          <input class="pitch-roll" type="text" id="node-input-pm45-r0" placeholder="">
+      </div>
+      <div class="form-row">
+          <label for="node-input-pm45-rp45"><i class="fa fa-quote-right"></i>
+               Pitch -45 Roll +45</label>
+          <input class="pitch-roll" type="text" id="node-input-pm45-rp45" placeholder="">
+      </div>
+      <div class="form-row">
+          <label for="node-input-p0-rm90"><i class="fa fa-quote-right"></i>
+               Pitch 0 Roll -90</label>
+          <input class="pitch-roll" type="text" id="node-input-p0-rm90" placeholder="">
+      </div>
+      <div class="form-row">
+          <label for="node-input-p0-rm45"><i class="fa fa-quote-right"></i>
+               Pitch 0 Roll -45</label>
+          <input class="pitch-roll" type="text" id="node-input-p0-rm45" placeholder="">
+      </div>
+      <div class="form-row">
+          <label for="node-input-p0-rp45"><i class="fa fa-quote-right"></i>
+               Pitch 0 Roll +45</label>
+          <input class="pitch-roll" type="text" id="node-input-p0-rp45" placeholder="">
+      </div>
+
+      <div class="form-row">
+          <label for="node-input-p0-rp90"><i class="fa fa-quote-right"></i>
+               Pitch 0 Roll +90</label>
+          <input class="pitch-roll" type="text" id="node-input-p0-rp90" placeholder="">
+      </div>
+      <div class="form-row">
+          <label for="node-input-p0-rp180"><i class="fa fa-quote-right"></i>
+               Pitch 0 Roll +180</label>
+          <input class="pitch-roll" type="text" id="node-input-p0-rp180" placeholder="">
+      </div>
+      <div class="form-row">
+          <label for="node-input-pp45-rm45"><i class="fa fa-quote-right"></i>
+               Pitch +45 Roll -45</label>
+          <input class="pitch-roll" type="text" id="node-input-pp45-rm45" placeholder="">
+      </div>
+      <div class="form-row">
+          <label for="node-input-pp45-r0"><i class="fa fa-quote-right"></i>
+               Pitch +45 Roll 0</label>
+          <input class="pitch-roll" type="text" id="node-input-pp45-r0" placeholder="">
+      </div>
+      <div class="form-row">
+          <label for="node-input-pp45-rp45"><i class="fa fa-quote-right"></i>
+               Pitch +45 Roll +45</label>
+          <input class="pitch-roll" type="text" id="node-input-pp45-rp45" placeholder="">
+      </div>
+      <div class="form-row">
+          <label for="node-input-pp90-r0"><i class="fa fa-quote-right"></i>
+               Pitch +90 Roll 0</label>
+          <input class="pitch-roll" type="text" id="node-input-pp90-r0" placeholder="">
+      </div>
+
+
+</script>
+
+<script type="text/x-red" data-help-name="sensor-rotation-to-phrase">
+    <p>This node is a sensor rotation interpreter. It expects input from
+    an IBM IOT In Node, which has been
+    configured to report on device events from a TI Sensor Tag. Consequently
+    this node interprets the rotational motion as a phrase providing
+    textual instruction for nodes downstream.
+    expects the rotational acceleration to be provided as input on
+    </p>
+
+    <p><b>Usage</b></p>
+    <p>This node expects as input the output from an IBM IOT In Node: </p>
+    <ul>
+      <li><code>msg.payload.d</code> : The device event from the TI Sensor
+      tag. The node makes use of the rotational acceleration to Determine
+      motion, and hence interpret that as set phrases. Consequently
+      the following input is expected:
+      <code>
+        msg.payload.d.accelX,
+        msg.payload.d.accelY,
+        msg.payload.d.accelZ
+      </code>
+      </li>
+    </ul>
+    <p>
+    If you lay the sensortag down, light sensor up, text the right way round,
+    then the side facing away from you is the bow, the side nearest you is the
+    stern. Left is port and right is starboard.
+
+    Then the <b>Pitch</b> will be the up down rolling motion of the bow and port.
+    The <b>Roll</b> is the tilting motion of the port and starboard. The <b>Yaw</b>
+    does not generate an acceleration reading in the sensortag, so will be
+    ignored.
+    </p>
+
+    <p>output - <code>msg.payload</code></p>
+
+
+    <p><b>Configuration</b></p>
+    <p>Set the sensitivity to determine how much motion is required
+    for rotational motion to be detected.
+    </p>
+</script>
+
+<script type="text/javascript">
+
+// Need to simulate a namespace
+function SRTP01 () {
+}
+
+// Instantiate the namespace. Done to avoid clash with other nodes.
+var srtp01 = new SRTP01();
+
+// Register the handlers for the fields
+srtp01.hideSelected = function (toggle) {
+  var field = null;
+  switch(toggle) {
+    case '201':
+      field = '#node-input-pm90-r0';
+      break;
+    case '211':
+      field = '#node-input-pm45-rm45';
+      break;
+    case '1':
+      field = '#node-input-pm45-r0';
+      break;
+    case '221':
+      field = '#node-input-pm45-rp45';
+      break;
+    case '210':
+      field = '#node-input-p0-rm90';
+      break;
+    case '10':
+      field = '#node-input-p0-rm45';
+      break;
+    case '20':
+      field = '#node-input-p0-rp45';
+      break;
+    case '202':
+      field = '#node-input-p0-rp90';
+      break;
+    case '200':
+      field = '#node-input-p0-rp180';
+      break;
+    case '212':
+      field = '#node-input-pp45-rm45';
+      break;
+    case '2':
+      field = '#node-input-pp45-r0';
+      break;
+    case '222':
+      field = '#node-input-pp45-rp45';
+      break;
+    case '220':
+      field = '#node-input-pp90-r0';
+      break;
+    default:
+      break;
+  }
+  $(".pitch-roll").parent().show();
+  if (field) {
+    $(field).parent().hide();
+  }
+}
+
+
+// Register the handlers for the fields
+srtp01.handlersUI = function () {
+  $('#node-input-start-toggle').change(function() {
+    var toggle_selected = $('#node-input-start-toggle').val();
+    console.log('Toggle selected is : ', toggle_selected);
+    srtp01.hideSelected(toggle_selected);
+  });
+}
+
+// This is the on edit prepare function, which will be invoked everytime the dialog
+// is shown.
+function srtp01editprepare() {
+  console.log('On Edit Prepare');
+  srtp01.handlersUI();
+}
+
+
+    (function() {
+        RED.nodes.registerType('sensor-rotation-to-phrase', {
+            category: 'function',
+            defaults: {
+                name: {value: ""},
+                sensitivity : {value: 0.5},
+                'start-toggle': {value: ""},
+                'pm90-r0': {value: ""},
+                'pm45-rm45': {value: ""},
+                'pm45-r0': {value: ""},
+                'pm45-rp45': {value: ""},
+                'p0-rm90': {value: ""},
+                'p0-rm45': {value: ""},
+                'p0-rp45': {value: ""},
+                'p0-rp90': {value: ""},
+                'p0-rp180': {value: ""},
+                'pp45-rm45': {value: ""},
+                'pp45-r0': {value: ""},
+                'pp45-rp45': {value: ""},
+                'pp90-r0': {value: ""}
+            },
+            color: "rgb(200,50,50)",
+            inputs: 1,
+            outputs: 1,
+            paletteLabel: "sensor rotation interpreter",
+            icon: "bridge.png",
+            label: function() {
+                return this.name || "sensor rotation interpreter";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic node_label_white" : "node_label_white";
+            },
+            oneditprepare: srtp01editprepare
+        });
+    })();
+</script>
