@@ -46,7 +46,7 @@ expect a Pitch or Roll that resets the sensorTag back to the horisontal reset
 position. ie. After a Pitch of +45 a Pitch of -45 is expected. If something
 else is seen then that is seen as a new signal Pitch or Roll.
 
-Consequently the following will be detected
+Consequently the following will be detected.
 A +ve Pitch is the bow rising and a +ve Roll is the port rising
 
 | Pitch   | Roll     | Detected  |
