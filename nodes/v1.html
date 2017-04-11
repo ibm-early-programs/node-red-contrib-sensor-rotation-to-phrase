@@ -22,10 +22,11 @@
     <div class="form-row">
         <label for="node-input-sensitivity">
             <i class="fa fa-balance-scale"></i> Sensitivity</label>
-        <input type="number" step="0.01" id="node-input-sensitivity" placeholder="">
+        <input type="number" step="0.01" min="0.01" max="0.99" 
+                      id="node-input-sensitivity" placeholder="">
     </div>
     <div class="form-row">
-        <label for="node-input-start-toggle"><i class="fa fa-toggle-off"></i> Start / Send Toggle: </label>
+        <label for="node-input-start-toggle"><i class="fa fa-toggle-off"></i> Listen / Send Toggle: </label>
         <select type="text" id="node-input-start-toggle" style="display: inline-block; width: 70%;">
             <option value="201">Pitch -90 Roll 0</option>
             <option value="211">Pitch -45 Roll -45</option>
