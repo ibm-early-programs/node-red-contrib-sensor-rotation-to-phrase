@@ -17,11 +17,17 @@ expects the rotational acceleration to be provided as input on
 ````
     msg.payload.d
 ````
-as
+as from an iOS bridge
 ````
     msg.payload.d.accelX
     msg.payload.d.accelY
     msg.payload.d.accelZ
+````
+or if from an Android bridge
+````
+    msg.payload.d.acc_x
+    msg.payload.d.acc_y
+    msg.payload.d.acc_z
 ````
 
 ### Calibration
