@@ -310,13 +310,13 @@ module.exports = function (RED) {
 
       initialDataCheck(msg, config)
         .then(function(){
-          initMotion(msg.payload.d, motion);
+          return initMotion(msg.payload.d, motion);
         })
         .then(function(){
-          detectMotion(node.context(), motion, config);
+          return detectMotion(node.context(), motion, config);
         })
         .then(function(){
-          measureMotion(node, msg, motion, config);
+          return measureMotion(node, msg, motion, config);
         })
         .catch(function(err){
           var messageTxt = err.error ? err.error : err;
