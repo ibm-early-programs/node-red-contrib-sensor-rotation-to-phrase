@@ -23,6 +23,11 @@ module.exports = function (RED) {
   function payloadCheck(msg) {
     var message = '';
     if (msg && msg.payload && msg.payload.d) {
+      // If data has come from an Android Bridge then
+      // the motion will be on acc_x, acc_y, accel_z
+      if (msg.payload.d.acc_x) {
+        androidSource(msg);
+      }
       if (! msg.payload.d.accelX ||
             ! msg.payload.d.accelY ||
             ! msg.payload.d.accelZ) {
@@ -32,6 +37,12 @@ module.exports = function (RED) {
       message = 'Missing device event';
     }
     return message;
+  }
+
+  function androidSource(msg) {
+    msg.payload.d.accelX = msg.payload.d.acc_x || 0;
+    msg.payload.d.accelY = msg.payload.d.acc_y || 0;
+    msg.payload.d.accelZ = msg.payload.d.acc_z || 0;
   }
 
   // Sensitivity is used to determine how much of a rotational
